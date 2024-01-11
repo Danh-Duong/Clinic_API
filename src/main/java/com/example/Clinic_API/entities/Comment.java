@@ -21,16 +21,21 @@ public class Comment extends BaseEntity{
     @JsonIgnore
     private User user;
 
+    // comment bác sĩ nào
     @ManyToOne
     @JoinColumn(name = "doctor_id")
     @JsonIgnore
     private User doctor;
 
+    // comment bài post nào
     @ManyToOne
     @JoinColumn(name = "post_id")
     @JsonIgnore
     private Post post;
 
-    private String imgUrl;
-
+    // bình luận phòng khám nào
+    @ManyToOne
+    @JoinColumn(name = "clinic_id")
+    @JsonIgnore
+    private Clinic clinic;
 }

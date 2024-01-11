@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.Arrays;
 import java.util.Collections;
 
 @Component
@@ -23,35 +24,56 @@ public class InitData {
     @Autowired
     RoleRepository roleRepository;
 
+    private static Role roleDoctor=null;
+    private static Role roleUser=null;
+    private static Role roleAdmin=null;
+
     @PostConstruct
     public void initData(){
         if (roleRepository.findByCode("ROLE_ADMIN")==null){
-            Role role=new Role();
-            role.setCode("ROLE_ADMIN");
-            role.setName("ROLE_ADMIN");
-            roleRepository.save(role);
+            roleAdmin=new Role();
+            roleAdmin.setCode("ROLE_ADMIN");
+            roleAdmin.setName("ROLE_ADMIN");
+            roleRepository.save(roleAdmin);
         }
 
         if (roleRepository.findByCode("ROLE_USER")==null){
-            Role role=new Role();
-            role.setCode("ROLE_USER");
-            role.setName("ROLE_USER");
-            roleRepository.save(role);
+            roleUser=new Role();
+            roleUser.setCode("ROLE_USER");
+            roleUser.setName("ROLE_USER");
+            roleRepository.save(roleUser);
         }
 
         if (roleRepository.findByCode("ROLE_DOCTOR")==null){
-            Role role=new Role();
-            role.setCode("ROLE_DOCTOR");
-            role.setName("ROLE_DOCTOR");
-            roleRepository.save(role);
+            roleDoctor=new Role();
+            roleDoctor.setCode("ROLE_DOCTOR");
+            roleDoctor.setName("ROLE_DOCTOR");
+            roleRepository.save(roleDoctor);
         }
-        if (userReposiitory.findByUsername("danh")==null){
+
+        // thêm 3 tài khoản admin, user, doctor
+        if (userReposiitory.findByUsername("admin")==null){
             User user=new User();
-            user.setUsername("danh");
+            user.setUsername("admin");
             user.setPassword(passwordEncoder.encode("admin"));
-            user.setRoles(Collections.singletonList(roleRepository.findByCode("ROLE_ADMIN")));
+            user.setRoles(Collections.singletonList(roleAdmin));
+            userReposiitory.save(user);
+        }
+
+        if (userReposiitory.findByUsername("doctor")==null){
+            User user=new User();
+            user.setUsername("doctor");
+            user.setPassword(passwordEncoder.encode("doctor"));
+            user.setRoles(Arrays.asList(roleDoctor,roleUser));
+            userReposiitory.save(user);
+        }
+
+        if (userReposiitory.findByUsername("user")==null){
+            User user=new User();
+            user.setUsername("user");
+            user.setPassword(passwordEncoder.encode("user"));
+            user.setRoles(Collections.singletonList(roleUser));
             userReposiitory.save(user);
         }
     }
-
 }

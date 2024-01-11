@@ -16,6 +16,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 public class AuthenService {
@@ -55,7 +57,14 @@ public class AuthenService {
 
         emailTokenRepository.save(emailToken);
 
-        emailService.sendEmailMime(user.getEmail(),emailToken.getToken());
+        ExecutorService executor= Executors.newSingleThreadExecutor();
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                 emailService.sendResetPassEmail(user.getEmail(),emailToken.getToken());
+            }
+        });
+
     }
 
 
@@ -69,10 +78,10 @@ public class AuthenService {
         if (emailToken==null)
             throw new RuntimeException("This token is none-exsit");
         // token đã hết hạn
-//        if (!checkTokenExpired(emailToken)){
-//            emailTokenRepository.delete(emailToken);
-//            throw new RuntimeException("This token is expired");
-//        }
+        if (!checkTokenExpired(emailToken)){
+            emailTokenRepository.delete(emailToken);
+            throw new RuntimeException("This token is already expired");
+        }
 
         userRequest.setPassword(passwordEncoder.encode(request.getNewPass()));
         userRepository.save(userRequest);
@@ -81,7 +90,7 @@ public class AuthenService {
 
     // mục đích sử dụng StringBuilder là để tiết kiếm bộ nhớ
     // về nếu sử dụng String thì tạo nên 1 vùng nhớ mới
-    // gây năng chương trình.
+    // gây nặng chương trình.
     public String generateCode(int len){
         String str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         Random random=new Random();

@@ -13,9 +13,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClinicResponse {
-    private String VietName;
-
+    private String vietName;
+    private String engName;
+    private String code;
     private String address;
-
-    private String urlAvatar;
+    private String phone;
+    private String email;
+    private String avatarUrl;
+    private List<FacultyResponse> facultyResponses;
 }

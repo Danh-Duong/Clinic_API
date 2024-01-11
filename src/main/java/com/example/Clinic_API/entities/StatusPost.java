@@ -11,7 +11,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Entity
 @Table
-public class Status extends BaseEntity{
+public class StatusPost extends BaseEntity{
     private String status;
 
     // đây là người bày tỏ cảm xúc
@@ -19,6 +19,7 @@ public class Status extends BaseEntity{
     @JoinColumn(name = "user_id")
     private User user;
 
+    // bài post bày tỏ cảm xúc
     @ManyToOne
     @JoinColumn(name = "post_id")
     private Post post;

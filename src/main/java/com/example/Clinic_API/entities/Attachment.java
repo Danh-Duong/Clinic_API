@@ -5,10 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Data
 @AllArgsConstructor
@@ -16,12 +13,24 @@ import javax.persistence.Table;
 @Table
 @Entity
 public class Attachment extends BaseEntity{
-    private String fileName;
-    private String fileUrl;
+    private String url;
+    private boolean isActive;
 
-
-    @ManyToOne
+    // 1 bài post sẽ có nhiều attachment
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
-    @JsonIgnore
+//    @JsonIgnore
     private Post post;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "clinic_id")
+    private Clinic clinic;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "attachmentType_id")
+    private AttachmentType attachmentType;
 }

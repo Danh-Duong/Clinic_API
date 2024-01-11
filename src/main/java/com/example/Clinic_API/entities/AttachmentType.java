@@ -12,13 +12,17 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
 @Table
-public class ClinicType extends BaseEntity{
+@Entity
+public class AttachmentType extends BaseEntity{
     private String name;
     private String code;
     private Boolean isActive;
 
-    @OneToMany(mappedBy = "clinicType")
-    private List<Clinic> clinics;
+    @OneToMany(mappedBy = "attachmentType")
+    private List<Attachment> attachments;
+
+    public static enum AttachmentTypeEnum{
+        AVATAR,POST
+    }
 }

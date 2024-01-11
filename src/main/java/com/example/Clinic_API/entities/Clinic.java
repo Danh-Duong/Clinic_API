@@ -17,22 +17,13 @@ public class Clinic extends BaseEntity{
 
     private String vietName;
     private String engName;
-
     private String code;
-
     private String address;
-
     private String phone;
-
     private String email;
 
+    // ở đây có thể là link facebook, hay link gg
     private String urlInfo;
-
-    private String urlAvatar;
-
-    // phát sinh thêm 1 trường để lấy dữ liệu tìm kiếm - lọc bệnh viện
-//    @Column(name = "district_id")
-//    private int districtId;
 
     @ManyToOne
     @JoinColumn(name = "district_id", insertable = false, updatable = false)
@@ -41,29 +32,24 @@ public class Clinic extends BaseEntity{
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "clinic_faculty", joinColumns = @JoinColumn(name = "clinic_id"),
-    inverseJoinColumns = @JoinColumn(name = "faculty_id"))
+            inverseJoinColumns = @JoinColumn(name = "faculty_id"))
     private List<Faculty> faculties;
 
-    // bệnh nhân và bác sĩ
+    // chứa thông tin bác sĩ và bệnh nhân
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "clinic_user", joinColumns = @JoinColumn(name = "clinic_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> users;
 
-
-    @Column(name = "clinicType_id")
-    private Long clinicTypeId;
-
-    @ManyToOne
-    @JoinColumn(name = "clinicType_id", insertable = false, updatable = false)
-    @JsonIgnore
-    private ClinicType clinicType;
-
-//    @OneToMany(mappedBy = "clinic", cascade = CascadeType.ALL)
-//    private List<Booking> bookings;
-
-    @ManyToOne
+    // người tạo ra clinic
+    @OneToOne
     @JoinColumn(name = "user_create_id")
     @JsonIgnore
     private User userCreate;
+
+    @OneToMany(mappedBy = "clinic")
+    private List<Post> posts;
+
+    @OneToMany(mappedBy = "clinic")
+    private List<Rate> rates;
 }

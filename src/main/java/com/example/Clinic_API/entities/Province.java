@@ -20,8 +20,8 @@ public class Province {
 
     private String name;
 
-    private String code;
+    private String codename;
 
-    @OneToMany(mappedBy = "province")
+    @OneToMany(mappedBy = "province", cascade = CascadeType.ALL)
     private List<District> districts;
 }

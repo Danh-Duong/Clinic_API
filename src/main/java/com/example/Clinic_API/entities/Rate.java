@@ -16,15 +16,24 @@ import javax.persistence.Table;
 @Table
 @Entity
 public class Rate extends BaseEntity{
+    private int numStar;
 
+    // người đánh giá
     @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonIgnore
     private User user;
 
+    // đánh giá bác sĩ nào
     @ManyToOne
     @JoinColumn(name = "doctor_id")
     @JsonIgnore
     private User doctor;
+
+    // đánh giá phòng khám nào
+    @ManyToOne
+    @JoinColumn(name = "clinic_id")
+    @JsonIgnore
+    private Clinic clinic;
 
 }

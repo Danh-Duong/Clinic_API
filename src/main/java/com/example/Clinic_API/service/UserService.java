@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.SimpleDateFormat;
+import java.util.Optional;
 
 import static com.example.Clinic_API.service.FileService.*;
 
@@ -102,7 +103,7 @@ public class UserService {
     }
 
 
-    public void updateUser(Long id,UserUpdateRequest userUpdateRequest){
+    public void updateInfoUser(Long id,UserUpdateRequest userUpdateRequest){
         try{
             User user=currentUser.getInfoUser().getUser();
             if (userRepository.findById(id).get()!=user)
@@ -115,6 +116,20 @@ public class UserService {
             userRepository.save(user);
         }
         catch (Exception e){}
+    }
+
+    public User getInfoUserById(Long userId){
+        Optional<User>user= userRepository.findById(userId);
+        if (!user.isPresent())
+            throw new RuntimeException("This user is none-exsit");
+        return user.get();
+    }
+
+    public void deleteUserById(Long userId){
+        Optional<User>user= userRepository.findById(userId);
+        if (!user.isPresent())
+            throw new RuntimeException("This user is none-exsit");
+        userRepository.delete(user.get());
     }
 
 }

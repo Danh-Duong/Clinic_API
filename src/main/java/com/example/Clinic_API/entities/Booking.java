@@ -11,47 +11,38 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table
 @Entity
+@Table( name = "Booking")
 public class Booking extends BaseEntity{
-
     private String namePatient;
     private String gender;
     private String phone;
     private String address;
+    // triệu chứng/ mô tả
     private String pathology;
 
-    // Email nhận thông báo (thành công)
+    // Email nhận thông báo đặt lịch
     private String email;
+
     // ngày thực hiện đặt lịch
     private Date dateBooking;
-    // người đặt lịch
+    private String status;
+
+    // người thực hiện đặt lịch
     @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonIgnore
-    private User user;
+    public User user;
 
-    // ở đây sẽ có 2 loại
-    // - booking bác sĩ
-    // - booking phòng khám (trong này có khoa cụ thể)
+    // đặt lịch bác sĩ nào
     @ManyToOne
     @JoinColumn(name = "doctor_id")
     @JsonIgnore
-    private User doctor;
-
-//    @ManyToOne
-//    @JoinColumn(name = "clinic_id")
-//    @JsonIgnore
-//    private Clinic clinic;
-
-    @ManyToOne
-    @JoinColumn(name = "faculty_id")
-    @JsonIgnore
-    private Faculty faculty;
+    public User doctor;
 
     // thời gian khám bệnh
     @OneToOne
-    @JoinColumn(name = "timeBooking_id")
-    private TimeBooking timeBooking;
-
+    @JoinColumn(name = "appointment_id")
+    @JsonIgnore
+    private Appointment appointment;
 }

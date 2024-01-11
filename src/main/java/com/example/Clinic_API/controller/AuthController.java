@@ -16,6 +16,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -74,6 +75,7 @@ public class AuthController {
                             loginRequest.getPassword()
                     )
             );
+            SecurityContextHolder.getContext().setAuthentication(auth);
             String username = auth.getName();
             String token = jwtTokenProvider.generateToken((CustomUserDetails) auth.getPrincipal());
             List<String> roles = new ArrayList<>();
@@ -95,13 +97,12 @@ public class AuthController {
         SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
         User user = UserConvert.dtoToEntity(signupRequest);
         user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
-//        if (!signupRequest.getRoleName().equalsIgnoreCase("role_admin"))
-//            user.setRoles(Arrays.asList(roleRepository.findByCode("ROLE_USER"),roleRepository.findByCode(signupRequest.getRoleName())));
         if (signupRequest.getRoleName().equalsIgnoreCase("role_doctor"))
             user.setRoles(Arrays.asList(roleRepository.findByCode("ROLE_USER"), roleRepository.findByCode("ROLE_DOCTOR")));
         else
             user.setRoles(Arrays.asList(roleRepository.findByCode("ROLE_USER")));
-        user.setBirthDate(format.parse(signupRequest.getBirthDate()));
+        if (signupRequest.getBirthDate()!=null)
+            user.setBirthDate(format.parse(signupRequest.getBirthDate()));
         userRepository.save(user);
         StringResponse response = new StringResponse();
         response.setResponseCode(ResponseCode.SUCCESS.getCode());
@@ -112,12 +113,8 @@ public class AuthController {
 
 //    http://localhost:8083/api/auth/loginGoogle?code=4%2F0AfJohXlX7nKM0fVrrv3264Oh-UOFU8pkAGETYTfkYdha9uuUp4EuOmxu5ygjuhroJKHB6w&scope=profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile
 
-    //    https://accounts.google.com/o/oauth2/auth?scope=profile&redirect_uri=http://localhost:8080/LoginGoogle/LoginGoogleHandler&response_type=code
-//            &client_id=672564251488-nn8bqot6aiq2k96vrf8pn7ljqjgv19u3.apps.googleusercontent.com&approval_prompt=force
-    // code này được lấy khi người dùng đăng nhập bằng gmail
-    // code ở đây là refreshtoken
-    // người dùng sử dụng code này để lấy access token
-    // Đăng nhập với tài khoản gmail
+//    https://accounts.google.com/o/oauth2/auth?scope=profile&redirect_uri=http://localhost:8080/LoginGoogle/LoginGoogleHandler&response_type=code
+//    &client_id=672564251488-nn8bqot6aiq2k96vrf8pn7ljqjgv19u3.apps.googleusercontent.com&approval_prompt=force
     @GetMapping("/loginGoogle")
     public ResponseEntity<?> loginWithGoogle(@RequestParam String code) {
         MultiValueMap<String, String> values = new LinkedMultiValueMap<>();
@@ -157,9 +154,17 @@ public class AuthController {
                 user.setUsername(userGoogleResponse.getName());
                 user.setPassword(passwordEncoder.encode("abc123"));
                 user.setRoles(Collections.singletonList(roleRepository.findByCode("ROLE_USER")));
-//                user.setEmail();
                 userRepository.save(user);
+                // set info email của user
             }
+
+            Authentication authentication=authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                    user.getUsername(),
+                    user.getPassword())
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
             LoginResponse loginResponse=new LoginResponse();
             loginResponse.setRoles(user.getRoles().stream().map(role -> role.getName()).collect(Collectors.toList()));
@@ -181,10 +186,14 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    // reset pass bằng token sau khi quên mật khẩu
     @PostMapping("/resetPass")
     public ResponseEntity<?> resetPass(@RequestBody ResetPassRequest request){
         authenService.resetPass(request);
-        return ResponseEntity.ok("ok");
+        return ResponseEntity.ok("Reset Password Successfully!");
     }
+
+    // đăng nhập bằng facebook
+    // đăng nhập bằng github
 
 }

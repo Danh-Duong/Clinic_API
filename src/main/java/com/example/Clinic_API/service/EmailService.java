@@ -14,6 +14,13 @@ public class EmailService {
     @Autowired
     public JavaMailSender javaMailSender;
 
+    public static final String RESET_CODE="@reset_code";
+
+    private static final String RESET_PASS_MESS=
+            "Thông báo!!!\n"
+            +"Mã code để reset mật khẩu của ứng dụng là: " + RESET_CODE
+            +"Vui lòng không chia sẻ mã code này.";
+
     public void sendEmail(String to, String code){
         SimpleMailMessage message=new SimpleMailMessage();
         message.setTo(to);
@@ -32,6 +39,14 @@ public class EmailService {
 //            messageHelper.addAttachment();
         };
         javaMailSender.send(messagePreparator);
+    }
+
+    public void sendResetPassEmail(String to,String code ){
+        SimpleMailMessage message=new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Thông báo");
+        message.setText(RESET_PASS_MESS.replace(RESET_CODE,code));
+        javaMailSender.send(message);
     }
 }
 

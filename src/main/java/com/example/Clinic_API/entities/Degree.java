@@ -19,8 +19,7 @@ public class Degree extends BaseEntity{
     private String name;
     private String code;
     private Boolean isActive;
-    private Date dateExpired;
 
     @ManyToMany(mappedBy = "degrees")
-    private List<User> users;
+    private List<User> doctor;
 }

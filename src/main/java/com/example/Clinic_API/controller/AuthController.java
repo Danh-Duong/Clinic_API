@@ -9,6 +9,7 @@ import com.example.Clinic_API.repository.UserRepository;
 import com.example.Clinic_API.security.CustomUserDetails;
 import com.example.Clinic_API.security.JwtTokenProvider;
 import com.example.Clinic_API.service.AuthenService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -23,6 +24,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import javax.validation.Valid;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -65,6 +67,9 @@ public class AuthController {
     @Autowired
     AuthenService authenService;
 
+    @Autowired
+    ModelMapper modelMapper;
+
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
         Authentication auth;
@@ -88,31 +93,25 @@ public class AuthController {
         }
     }
 
-    // Sign up
     @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@RequestBody SignupRequest signupRequest) throws ParseException {
+    public ResponseEntity<?> signUp(@Valid @RequestBody SignupRequest signupRequest) throws ParseException {
         if (userRepository.findByUsername(signupRequest.getUsername()) != null)
-            throw new RuntimeException("This username is exsit");
-
+            throw new RuntimeException("This username is already exsit");
         SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-        User user = UserConvert.dtoToEntity(signupRequest);
+        User user = modelMapper.map(signupRequest, User.class);
         user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
-        if (signupRequest.getRoleName().equalsIgnoreCase("role_doctor"))
-            user.setRoles(Arrays.asList(roleRepository.findByCode("ROLE_USER"), roleRepository.findByCode("ROLE_DOCTOR")));
-        else
-            user.setRoles(Arrays.asList(roleRepository.findByCode("ROLE_USER")));
         if (signupRequest.getBirthDate()!=null)
             user.setBirthDate(format.parse(signupRequest.getBirthDate()));
+        user.setRoles(Collections.singletonList(roleRepository.findByCode("ROLE_USER")));
         userRepository.save(user);
         StringResponse response = new StringResponse();
         response.setResponseCode(ResponseCode.SUCCESS.getCode());
         response.setResponseStatus(ResponseCode.SUCCESS.name());
-        response.setMessage("Create user Success");
+        response.setMessage("Create User Successfully");
         return ResponseEntity.ok(response);
     }
 
 //    http://localhost:8083/api/auth/loginGoogle?code=4%2F0AfJohXlX7nKM0fVrrv3264Oh-UOFU8pkAGETYTfkYdha9uuUp4EuOmxu5ygjuhroJKHB6w&scope=profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile
-
 //    https://accounts.google.com/o/oauth2/auth?scope=profile&redirect_uri=http://localhost:8080/LoginGoogle/LoginGoogleHandler&response_type=code
 //    &client_id=672564251488-nn8bqot6aiq2k96vrf8pn7ljqjgv19u3.apps.googleusercontent.com&approval_prompt=force
     @GetMapping("/loginGoogle")
@@ -177,10 +176,10 @@ public class AuthController {
 
 
     @PostMapping("/forgetPass")
-    public ResponseEntity<?> forgetPass(@RequestBody ForgetPassRequest request){
+    public ResponseEntity<?> forgetPass(@Valid @RequestBody ForgetPassRequest request){
         authenService.forgotPass(request);
         StringResponse response=new StringResponse();
-        response.setMessage("Send code to your email success");
+        response.setMessage("Send code to your email successfully");
         response.setResponseCode(ResponseCode.SUCCESS.getCode());
         response.setResponseStatus(ResponseCode.SUCCESS.name());
         return ResponseEntity.ok(response);

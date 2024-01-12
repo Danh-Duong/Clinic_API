@@ -12,6 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.Email;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -33,35 +35,44 @@ public class AuthenService {
     @Autowired
     PasswordEncoder passwordEncoder;
 
-    private final Long timeExpired= 1000*60*1L;
+    // 2 phút
+    private final Long timeExpired= (long) 1000 * 60 * 2;
 
     // thời gian ở đây là 60s
-    @Scheduled(fixedRate = 60*1000)
-    public void cleanTokenAuto(){
-        List<EmailToken> emailTokens=emailTokenRepository.findAll();
-        for (EmailToken email: emailTokens)
-            if (!checkTokenExpired(email))
-                emailTokenRepository.delete(email);
-    }
+//    @Scheduled(fixedRate = 60*1000)
+//    public void cleanTokenAuto(){
+//        List<EmailToken> emailTokens=emailTokenRepository.findAll();
+//        for (EmailToken email: emailTokens)
+//            if (!checkTokenExpired(email))
+//                emailTokenRepository.delete(email);
+//    }
 
     public void forgotPass(ForgetPassRequest request){
-        User user=userRepository.findByUsername(request.getUsername());
+        User user=userRepository.findByUsername(request.getUsernameOrEmail());
+        if (user==null)
+            user=userRepository.findByEmail(request.getUsernameOrEmail());
         if (user==null)
             throw new RuntimeException("This user is none-exsit");
-        if (emailTokenRepository.findByUser(user)!=null)
-            emailTokenRepository.delete(emailTokenRepository.findByUser(user));
-        EmailToken emailToken=new EmailToken();
-        emailToken.setToken(String.valueOf(generateCode(5)));
-        emailToken.setDateExpired(new Date(new Date().getTime()+ timeExpired));
-        emailToken.setUser(user);
+        EmailToken emailToken=emailTokenRepository.findByUser(user);
+        if (emailToken==null){
+            emailToken = new EmailToken();
+            emailToken.setUser(user);
+        }
 
+        emailToken.setToken(String.valueOf(generateCode(5)));
+//        Instant expirationInstant = Instant.now().plus(Duration.ofMillis(timeExpired));
+//        emailToken.setDateExpired(Date.from(expirationInstant));
+        emailToken.setDateExpired(new Date(new Date().getTime() + timeExpired));
         emailTokenRepository.save(emailToken);
 
-        ExecutorService executor= Executors.newSingleThreadExecutor();
+        ExecutorService executor= Executors.newFixedThreadPool(1);
+        // dùng final vì executor cần đảm bảo 1 biến ổn định
+        User finalUser = user;
+        EmailToken finalEmailToken = emailToken;
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                 emailService.sendResetPassEmail(user.getEmail(),emailToken.getToken());
+                 emailService.sendResetPassEmail(finalUser.getEmail(), finalEmailToken.getToken());
             }
         });
 
@@ -70,13 +81,17 @@ public class AuthenService {
 
     public void resetPass(ResetPassRequest request){
         EmailToken emailToken= emailTokenRepository.findByToken(request.getToken());
-        User userRequest= userRepository.findByUsername(request.getUsername());
+        User userRequest= userRepository.findByUsername(request.getEmailOrUsername());
+        if (userRequest==null)
+            userRequest=userRepository.findByEmail(request.getEmailOrUsername());
+        if (userRequest==null)
+            throw new RuntimeException("This user doesn't exist");
         // không trùng user
         if (userRequest.getId()!=emailToken.getUser().getId()){
             throw new RuntimeException("This action is invalid");
         }
         if (emailToken==null)
-            throw new RuntimeException("This token is none-exsit");
+            throw new RuntimeException("This token doesn't exist");
         // token đã hết hạn
         if (!checkTokenExpired(emailToken)){
             emailTokenRepository.delete(emailToken);
@@ -106,7 +121,7 @@ public class AuthenService {
 
     public Boolean checkTokenExpired(EmailToken emailToken){
         Date now=new Date();
-        if (emailToken.getDateExpired().before(now))
+        if (emailToken.getDateExpired().after(now))
             return true;
         return false;
     }

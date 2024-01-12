@@ -33,11 +33,10 @@ public class GlobalException {
         errorResponse.setResponseCode(ResponseCode.ERROR.getCode());
         errorResponse.setResponseStatus(ResponseCode.ERROR.name());
         errorResponse.setTimestamp(new Date());
-        errorResponse.setMessage(e.getMessage());
-
         Map<String,String> errors=new HashMap<>();
         e.getBindingResult().getFieldErrors().forEach(error -> errors.put(error.getField(),error.getDefaultMessage()));
-        errorResponse.setDetail(errors.toString());
+        errorResponse.setMessage(errors.toString());
+        errorResponse.setDetail(e.getMessage());
         return ResponseEntity.badRequest().body(errorResponse);
     }
 }

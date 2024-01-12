@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 public class ResetPassRequest {
     @NotNull
-    private String username;
+    private String emailOrUsername;
     @NotNull
     private String token;
     @NotNull

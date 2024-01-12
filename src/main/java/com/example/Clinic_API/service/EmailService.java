@@ -17,8 +17,8 @@ public class EmailService {
     public static final String RESET_CODE="@reset_code";
 
     private static final String RESET_PASS_MESS=
-            "Thông báo!!!\n"
-            +"Mã code để reset mật khẩu của ứng dụng là: " + RESET_CODE
+            "Thông báo !!!\n"
+            +"Mã code để reset mật khẩu ứng dụng là: " + RESET_CODE +"\n"
             +"Vui lòng không chia sẻ mã code này.";
 
     public void sendEmail(String to, String code){

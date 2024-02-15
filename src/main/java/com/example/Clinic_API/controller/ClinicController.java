@@ -23,37 +23,35 @@ public class ClinicController {
     @Autowired
     ClinicService clinicService;
 
-    // lấy danh sách phòng khám trên cả nước
-    // dữ liệu Parameter là Object
-    // đây chỉ là lấy ra danh sách còn đi sâu vô là chi tiết
-//    @GetMapping("/getClinics")
-//    public ResponseEntity<?> getAllClinics(@RequestParam(required = false, defaultValue = "10") Integer limit,
-//                                           @RequestParam(required = false, defaultValue = "1") Integer page,
-//                                           @RequestParam(required = false) Integer provinceId,
-//                                           @RequestParam(required = false) Integer districtId,
-//                                           @RequestParam(required = false) String name){
-//        return ResponseEntity.ok(clinicService.getAllClinics(limit,page,provinceId, districtId,name));
-//    }
+    @GetMapping("/getClinics")
+    public ResponseEntity<?> getAllClinics(@RequestParam(required = false, defaultValue = "10") Integer limit,
+                                           @RequestParam(required = false, defaultValue = "1") Integer page,
+                                           @RequestParam(required = false) Integer provinceId,
+                                           @RequestParam(required = false) Integer districtId,
+                                           @RequestParam(required = false) Long facultyId,
+                                           @RequestParam(required = false) String name){
+        return ResponseEntity.ok(clinicService.getAllClinics(limit,page,provinceId, districtId, facultyId,name));
+    }
 
     // lấy thông tin chi tiết của clinic
-//    @GetMapping("/{clinicId}")
-//    public ResponseEntity<?> getClinic(@PathVariable Long clinicId){
-//        return ResponseEntity.ok(clinicService.getClinicById(clinicId));
-//    }
+    @GetMapping("/{clinicId}")
+    public ResponseEntity<?> getClinic(@PathVariable Long clinicId){
+        return ResponseEntity.ok(clinicService.getClinicById(clinicId));
+    }
 
-//    @PostMapping(value = "/create", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-//    @PreAuthorize("hasAnyRole('ROLE_DOCTOR')")
-//    // ảnh ở đây là ảnh đại diện của bệnh viện
-//    public ResponseEntity<?> createClinic(@ModelAttribute ClinicRequest clinicRequest){
-//        clinicService.createClinic(clinicRequest);
-//        StringResponse response=new StringResponse();
-//        response.setMessage("Create Clinic success");
-//        response.setResponseCode(ResponseCode.SUCCESS.getCode());
-//        response.setResponseStatus(ResponseCode.SUCCESS.name());
-//        return ResponseEntity.ok(response);
-//    }
-//
-//    // cập nhập thông tin của clinic
+    @PostMapping(value = "/create", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @PreAuthorize("hasAnyRole('ROLE_DOCTOR')")
+    // ảnh ở đây là ảnh đại diện của bệnh viện
+    public ResponseEntity<?> createClinic(@ModelAttribute ClinicRequest request){
+        clinicService.createClinic(request,request.getFile());
+        StringResponse response=new StringResponse();
+        response.setMessage("Create Clinic Successfully");
+        response.setResponseCode(ResponseCode.SUCCESS.getCode());
+        response.setResponseStatus(ResponseCode.SUCCESS.name());
+        return ResponseEntity.ok(response);
+    }
+
+    // cập nhập thông tin của clinic
 //    @PreAuthorize("hasAnyRole('ROLE_DOCTOR')")
 //    @PutMapping("update/{clinicId}")
 //    public ResponseEntity<?> updateClinic(@RequestBody ClinicRequest clinicRequest, @PathVariable Long clinicId){

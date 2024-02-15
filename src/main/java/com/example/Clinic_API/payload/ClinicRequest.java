@@ -8,13 +8,14 @@ import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 public class ClinicRequest {
-
+    @NotNull
     private String vietName;
     private String engName;
     private String code;
@@ -22,8 +23,8 @@ public class ClinicRequest {
     private String phone;
     private String email;
     private String urlInfo;
+    @NotNull
     private List<String> facultyNames;
-    private Long clinicTypeCode;
-    private MultipartFile file;
 
+    private MultipartFile file;
 }

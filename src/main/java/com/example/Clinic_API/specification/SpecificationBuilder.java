@@ -22,7 +22,6 @@ public class SpecificationBuilder {
     public Specification<?> build(){
         if (params.size()==0)
             return null;
-
         List<Specification> specs=params.stream()
                 .map(SpecificationFilter::generate)
                 .collect(Collectors.toList());

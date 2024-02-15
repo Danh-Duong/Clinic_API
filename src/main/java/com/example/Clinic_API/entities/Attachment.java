@@ -14,23 +14,26 @@ import javax.persistence.*;
 @Entity
 public class Attachment extends BaseEntity{
     private String url;
-    private boolean isActive;
+    private boolean isActive=true;
 
     // 1 bài post sẽ có nhiều attachment
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "post_id")
-//    @JsonIgnore
+    @JsonIgnore
     private Post post;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "clinic_id")
+    @JsonIgnore
     private Clinic clinic;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "attachmentType_id")
+    @JsonIgnore
     private AttachmentType attachmentType;
 }

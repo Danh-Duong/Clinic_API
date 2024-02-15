@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DistrictRepository extends JpaRepository<District, Integer> {
-//    public District findByName(String name);
+    public District findByNameLike(String name);
 }

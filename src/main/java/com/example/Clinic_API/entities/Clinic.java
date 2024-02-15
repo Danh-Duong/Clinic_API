@@ -44,7 +44,6 @@ public class Clinic extends BaseEntity{
     // người tạo ra clinic
     @OneToOne
     @JoinColumn(name = "user_create_id")
-    @JsonIgnore
     private User userCreate;
 
     @OneToMany(mappedBy = "clinic")
@@ -52,4 +51,7 @@ public class Clinic extends BaseEntity{
 
     @OneToMany(mappedBy = "clinic")
     private List<Rate> rates;
+
+    @OneToMany(mappedBy = "clinic")
+    private List<Attachment> attachments;
 }

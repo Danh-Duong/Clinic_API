@@ -1,5 +1,6 @@
 package com.example.Clinic_API.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,7 @@ public class Faculty extends BaseEntity{
     private Boolean isActive;
 
     @ManyToMany(mappedBy = "faculties")
+    @JsonIgnore
     private List<Clinic> clinics;
 
     // chứa thông tin của bác sĩ

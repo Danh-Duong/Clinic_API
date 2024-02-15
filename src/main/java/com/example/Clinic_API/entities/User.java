@@ -1,5 +1,6 @@
 package com.example.Clinic_API.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -42,10 +43,12 @@ public class User extends BaseEntity{
     // 1 bác sĩ chỉ cho trong 1 clinic
     // 1 bệnh viện có nhiều bác sĩ và bệnh nhân
     @ManyToMany(mappedBy = "users")
+    @JsonIgnore
     private List<Clinic> clinics;
 
     @OneToOne(mappedBy = "userCreate")
-    private Clinic clinicCreate;
+    @JsonIgnore
+    private Clinic userCreate;
 
     // người đánh giá
     @OneToMany(mappedBy = "user")

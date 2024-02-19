@@ -51,7 +51,7 @@ public class User extends BaseEntity{
     private Clinic userCreate;
 
     // người đánh giá
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Rate> rateUsers;
 
     // bác sĩ được đánh giá

@@ -15,7 +15,6 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 public class ClinicRequest {
-    @NotNull
     private String vietName;
     private String engName;
     private String code;
@@ -23,7 +22,6 @@ public class ClinicRequest {
     private String phone;
     private String email;
     private String urlInfo;
-    @NotNull
     private List<String> facultyNames;
 
     private MultipartFile file;

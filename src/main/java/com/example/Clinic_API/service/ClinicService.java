@@ -37,13 +37,13 @@ public class ClinicService {
     FacultyRepository facultyRepository;
 
     @Autowired
-    final CurrentUser currentUser=new CurrentUser();
+    CurrentUser currentUser=new CurrentUser();
 
     @Autowired
     UserRepository userRepository;
 
-    @Autowired
-    DistrictRepository districtRepository;
+//    @Autowired
+//    DistrictRepository districtRepository;
     @Autowired
     private RoleRepository roleRepository;
 
@@ -61,12 +61,14 @@ public class ClinicService {
             builder.with("vietName", OperationEnum.LIKE,name);
 //        if (provinceId!=null)
 //            builder.with("district.id.province.id",OperationEnum.EQUALS, String.valueOf(provinceId));
-//        if (districtId!=null)
-//            builder.with("district.id", OperationEnum.EQUALS, String.valueOf(districtId));
+        if (districtId!=null)
+            builder.with("district.id", OperationEnum.EQUALS, String.valueOf(districtId));
 
         Specification specification=builder.build();
         List<Clinic> clinics= clinicRepository.findAll(specification, PageRequest.of(page-1,limit.intValue())).getContent();
-        List<ClinicResponse> responses=new ArrayList<>();
+//        List<Clinic> clinics=clinicRepository.findAll();
+//        System.out.println("Danh: " + clinics.size());
+            List<ClinicResponse> responses=new ArrayList<>();
         for (Clinic clinic: clinics){
             ClinicResponse clinicResponse=modelMapper.map(clinic, ClinicResponse.class);
             // lấy ảnh đại diện
@@ -78,8 +80,9 @@ public class ClinicService {
             for (Faculty faculty: clinic.getFaculties())
                 facultyResponses.add(modelMapper.map(faculty, FacultyResponse.class));
             clinicResponse.setFacultyResponses(facultyResponses);
-            return responses;
-        }}
+            responses.add(clinicResponse);
+        }
+            return responses;}
         catch (Exception e){
             e.printStackTrace();
         }
@@ -103,8 +106,8 @@ public class ClinicService {
         if (clinicRepository.findByAddress(request.getAddress())!=null)
             throw new RuntimeException("This address of clinic is already exsit");
         // 1 bác sĩ chỉ có thể tạo được 1 phòng khám
-        if (clinicRepository.findByUserCreate(currentUser.getUser())!=null)
-            throw new RuntimeException("One doctor only crate one clinic");
+//        if (clinicRepository.findByUserCreate(currentUser.getUser())!=null)
+//            throw new RuntimeException("One doctor only crate one clinic");
         Clinic clinic= new Clinic();
         clinic= modelMapper.map(request, Clinic.class);
         List<Faculty> faculties=new ArrayList<>();
@@ -138,22 +141,28 @@ public class ClinicService {
 
     }
         catch (Exception e){
-            throw new RuntimeException("Error Creating Clinic");
+//            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
+
     }
-//
-//    public void updateClinic(Long clinicId,ClinicRequest clinicRequest){
-//        Clinic clinic=clinicRepository.findById(clinicId).orElseThrow(()-> new RuntimeException("This clinic is non-exsit"));
-//        currentUser.getInfoUser();
-//        // không có quyền
-//        if (clinic.getUserCreate()!=currentUser.getUser())
-//            throw new RuntimeException("This action is banned");
+
+    public void updateClinic(Long clinicId,ClinicRequest clinicRequest){
+        try{
+        Clinic clinic=clinicRepository.findById(clinicId).orElseThrow(()-> new RuntimeException("This clinic doesn't exsit"));
+       currentUser.getInfoUser();
+        // không có quyền
+        if (clinic.getUserCreate()!=currentUser.getUser())
+            throw new RuntimeException("This action is banned");
 //        BeanUtils.copyProperties(clinicRequest, clinic);
-//        if (clinicRequest.getVietName()!=null)
+        if (clinicRequest.getVietName()!=null && clinicRepository.findByVietName(clinicRequest.getVietName())!=null)
 //            if (clinic.getVietName()!=clinicRequest.getVietName() && clinicRepository.findByAddress(clinic.getAddress())!=null)
-//                throw new RuntimeException("This name is exsit");
+                throw new RuntimeException("This name of clinic already exists");
+//        else
 //            clinic.setVietName(clinicRequest.getVietName());
-//        if (clinicRequest.getAddress()!=null)
+        if (clinicRequest.getAddress()!=null && clinicRepository.findByAddress(clinicRequest.getAddress())!=null)
+            throw new RuntimeException("This address of clinic already exists");
+//        else
 //            clinic.setAddress(clinicRequest.getAddress());
 //        if (clinicRequest.getPhone()!=null)
 //            clinic.setPhone(clinicRequest.getPhone());
@@ -161,23 +170,27 @@ public class ClinicService {
 //            clinic.setEmail(clinicRequest.getEmail());
 //        if (clinicRequest.getUrlInfo()!=null)
 //            clinic.setUrlInfo(clinicRequest.getUrlInfo());
-//        if (clinicRequest.getFacultyNames().size()>0){
+        clinic = modelMapper.map(clinicRequest, Clinic.class);
+        List<Faculty> newFaculties=new ArrayList<>();
+        if (clinicRequest.getFacultyNames().size()>0){
 //            // xóa tất cả những khoa hiện tại của bệnh viện
 //            clinic.getFaculties().clear();
-//            for (String s : clinicRequest.getFacultyNames()){
-//                Faculty f=facultyRepository.findByName(s);
-//                if (f==null){
-//                    Faculty newF=new Faculty();
-//                    newF.setName(s);
-//                    facultyRepository.save(newF);
-//                    clinic.getFaculties().add(newF);
-//                }
-//                else
-//                    clinic.getFaculties().add(f);
-//            }
-//        }
-//        clinicRepository.save(clinic);
-//    }
+            for (String s : clinicRequest.getFacultyNames()){
+                Faculty fac=null;
+                fac=facultyRepository.findByName(s);
+                if (fac==null){
+                    fac.setName(s);
+                    facultyRepository.save(fac);
+                }
+                newFaculties.add(fac);
+            }
+            clinic.setFaculties(newFaculties);
+        }
+        clinicRepository.save(clinic);}
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 //
 //    public void updateAvatarClinic(Long clinicId, MultipartFile file){
 //        try{
@@ -194,38 +207,38 @@ public class ClinicService {
 //
 //    }
 //
-//    public void deleteClinic(Long clinicId){
-//        try{
-//            Clinic clinic=clinicRepository.findById(clinicId).orElseThrow(()-> new RuntimeException("This clinic is non_exsit"));
-//            currentUser.getInfoUser();
-//            // chỉ có người tạo bệnh viện và admin mới được quyền xóa
-//            if (!(clinic.getUserCreate()==currentUser.getUser() || currentUser.getIsAdmin()))
-//                throw new RuntimeException("This action is banned");
-//            // đối với các quan hệ many to many thì sẽ delete trước toàn bộ code
-//            clinic.getFaculties().clear();
-//            clinicRepository.delete(clinic);
-//        }
-//        catch (Exception e){
-//            e.printStackTrace();
-//        }
-//    }
+    public void deleteClinic(Long clinicId){
+        try{
+            Clinic clinic=clinicRepository.findById(clinicId).orElseThrow(()-> new RuntimeException("This clinic doesn't exsit"));
+            currentUser.getInfoUser();
+            // chỉ có người tạo bệnh viện và admin mới được quyền xóa
+            if (!(clinic.getUserCreate()==currentUser.getUser() || currentUser.getIsAdmin()))
+                throw new RuntimeException("This action is banned");
+            // đối với các quan hệ many to many thì sẽ delete trước toàn bộ dữ liệu liên quan
+            // dùng cascade ALL
+            clinicRepository.delete(clinic);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 //
-//    public void addDoctorIntoClinic(Long clinicId, String email){
-//        Clinic clinic=clinicRepository.findById(clinicId).orElseThrow(() -> new RuntimeException("This clinic is none-exsit"));
-//        User user=userRepository.findByUsername(email);
-//        if (user==null)
-//            throw new RuntimeException("This doctor is none-exsit");
-//        if (!user.getRoles().contains(roleRepository.findByCode("ROLE_DOCTOR")))
-//            throw new RuntimeException("This user isn't doctor");
-//        if (clinic.getUsers().contains(user))
-//            throw new RuntimeException("This doctor is already in this clinic");
-//        // kiểm tra xem user có tồn tại ở clinic khác không
-//        if (user.getClinics().size()>0)
-//            throw new RuntimeException("This doctor belongs to another clinic");
-//        currentUser.getInfoUser();
-//        if (currentUser.getUser()!=clinic.getUserCreate())
-//            throw new RuntimeException("This action is banned. You must a doctor create clinic");
-//        clinic.getUsers().add(user);
-//        clinicRepository.save(clinic);
-//    }
+    public void addDoctorIntoClinic(Long clinicId, String email){
+        Clinic clinic=clinicRepository.findById(clinicId).orElseThrow(() -> new RuntimeException("This clinic doesn't exsit"));
+        User doctor=userRepository.findByUsername(email);
+        if (doctor==null)
+            throw new RuntimeException("This doctor doesn't exsit");
+        if (!doctor.getRoles().contains(roleRepository.findByCode("ROLE_DOCTOR")))
+            throw new RuntimeException("This user isn't doctor");
+        if (clinic.getUsers().contains(doctor))
+            throw new RuntimeException("This doctor is already in this clinic");
+        // kiểm tra xem user có tồn tại ở clinic khác không
+        if (doctor.getClinics().size()>0)
+            throw new RuntimeException("This doctor belongs to another clinic");
+        currentUser.getInfoUser();
+        if (currentUser.getUser()!=clinic.getUserCreate())
+            throw new RuntimeException("This action is banned. You must a doctor create clinic");
+        clinic.getUsers().add(doctor);
+        clinicRepository.save(clinic);
+    }
 }

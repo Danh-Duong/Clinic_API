@@ -12,4 +12,6 @@ public interface ClinicRepository extends JpaRepository<Clinic, Long>, JpaSpecif
     Clinic findByAddress(String address);
 
     Clinic findByUserCreate(User user);
+
+    Clinic findByVietName(String vietName);
 }

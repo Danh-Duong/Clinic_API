@@ -52,16 +52,16 @@ public class ClinicController {
     }
 
     // cập nhập thông tin của clinic
-//    @PreAuthorize("hasAnyRole('ROLE_DOCTOR')")
-//    @PutMapping("update/{clinicId}")
-//    public ResponseEntity<?> updateClinic(@RequestBody ClinicRequest clinicRequest, @PathVariable Long clinicId){
-//        clinicService.updateClinic(clinicId, clinicRequest);
-//        StringResponse response=new StringResponse();
-//        response.setMessage("Update Clinic success");
-//        response.setResponseCode(ResponseCode.SUCCESS.getCode());
-//        response.setResponseStatus(ResponseCode.SUCCESS.name());
-//        return ResponseEntity.ok(response);
-//    }
+    @PreAuthorize("hasAnyRole('ROLE_DOCTOR')")
+    @PutMapping("update/{clinicId}")
+    public ResponseEntity<?> updateClinic(@RequestBody ClinicRequest clinicRequest, @PathVariable Long clinicId){
+        clinicService.updateClinic(clinicId, clinicRequest);
+        StringResponse response=new StringResponse();
+        response.setMessage("Update Clinic Successfully");
+        response.setResponseCode(ResponseCode.SUCCESS.getCode());
+        response.setResponseStatus(ResponseCode.SUCCESS.name());
+        return ResponseEntity.ok(response);
+    }
 //
 //    // cập nhập ảnh đại diện của bệnh viện
 //    @PreAuthorize("hasAnyRole('ROLE_DOCTOR')")
@@ -73,28 +73,24 @@ public class ClinicController {
 //    }
 //
 //    // dùng cascade=Cascade.ALL để có thể xóa các dữ liệu liên quan
-//    @PreAuthorize("hasAnyRole('ROLE_DOCTOR', 'ROLE_ADMIN')")
-//    @DeleteMapping("delete/{clinicId}")
-//    public ResponseEntity<?> deleteClinic(@PathVariable Long clinicId){
-//        clinicService.deleteClinic(clinicId);
-//        StringResponse response=new StringResponse();
-//        response.setMessage("Delete Clinic success");
-//        response.setResponseCode(ResponseCode.SUCCESS.getCode());
-//        response.setResponseStatus(ResponseCode.SUCCESS.name());
-//        return ResponseEntity.ok(response);
-//    }
+    @PreAuthorize("hasAnyRole('ROLE_DOCTOR', 'ROLE_ADMIN')")
+    @DeleteMapping("delete/{clinicId}")
+    public ResponseEntity<?> deleteClinic(@PathVariable Long clinicId){
+        clinicService.deleteClinic(clinicId);
+        StringResponse response=new StringResponse();
+        response.setMessage("Delete Clinic success");
+        response.setResponseCode(ResponseCode.SUCCESS.getCode());
+        response.setResponseStatus(ResponseCode.SUCCESS.name());
+        return ResponseEntity.ok(response);
+    }
 
     // thêm bác sĩ vào phòng khám bởi chủ phòng khám
-//    @PreAuthorize("hasAnyRole('ROLE_DOCTOR')")
-//    @PostMapping("addDoctor")
-//    public ResponseEntity<?> addDoctorIntoClinic(@RequestParam Long clinicId,
-//                                                 @RequestParam String username,
-//                                                 @RequestParam String email){
-//        clinicService.addDoctorIntoClinic(clinicId,username, email);
-//        StringResponse response=new StringResponse(ResponseCode.SUCCESS.getCode(),ResponseCode.SUCCESS.name(), "Add doctor into clinic success");
-//        return ResponseEntity.ok(response);
-//    }
-
-
-
+    @PreAuthorize("hasAnyRole('ROLE_DOCTOR')")
+    @PostMapping("addDoctor")
+    public ResponseEntity<?> addDoctorIntoClinic(@RequestParam Long clinicId,
+                                                 @RequestParam String email){
+        clinicService.addDoctorIntoClinic(clinicId, email);
+        StringResponse response=new StringResponse(ResponseCode.SUCCESS.getCode(),ResponseCode.SUCCESS.name(), "Add doctor into clinic success");
+        return ResponseEntity.ok(response);
+    }
 }

@@ -25,10 +25,11 @@ public class Clinic extends BaseEntity{
     // ở đây có thể là link facebook, hay link gg
     private String urlInfo;
 
-    @ManyToOne
-    @JoinColumn(name = "district_id", insertable = false, updatable = false)
-    @JsonIgnore
-    private District district;
+//    @ManyToOne
+//    @JoinColumn(name = "district_id")
+//    @JsonIgnore
+//    private District district;
+    private Long districtId;
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "clinic_faculty", joinColumns = @JoinColumn(name = "clinic_id"),
@@ -36,7 +37,7 @@ public class Clinic extends BaseEntity{
     private List<Faculty> faculties;
 
     // chứa thông tin bác sĩ và bệnh nhân
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
     @JoinTable(name = "clinic_user", joinColumns = @JoinColumn(name = "clinic_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> users;
@@ -46,12 +47,12 @@ public class Clinic extends BaseEntity{
     @JoinColumn(name = "user_create_id")
     private User userCreate;
 
-    @OneToMany(mappedBy = "clinic")
+    @OneToMany(mappedBy = "clinic", cascade = CascadeType.ALL)
     private List<Post> posts;
 
-    @OneToMany(mappedBy = "clinic")
+    @OneToMany(mappedBy = "clinic", cascade = CascadeType.ALL)
     private List<Rate> rates;
 
-    @OneToMany(mappedBy = "clinic")
+    @OneToMany(mappedBy = "clinic", cascade = CascadeType.ALL)
     private List<Attachment> attachments;
 }

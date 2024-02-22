@@ -95,20 +95,29 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignupRequest signupRequest) throws ParseException {
-        if (userRepository.findByUsername(signupRequest.getUsername()) != null)
-            throw new RuntimeException("This username is already exsit");
-        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-        User user = modelMapper.map(signupRequest, User.class);
-        user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
-        if (signupRequest.getBirthDate()!=null)
-            user.setBirthDate(format.parse(signupRequest.getBirthDate()));
-        user.setRoles(Collections.singletonList(roleRepository.findByCode("ROLE_USER")));
-        userRepository.save(user);
-        StringResponse response = new StringResponse();
-        response.setResponseCode(ResponseCode.SUCCESS.getCode());
-        response.setResponseStatus(ResponseCode.SUCCESS.name());
-        response.setMessage("Create User Successfully");
-        return ResponseEntity.ok(response);
+        try {
+            if (userRepository.findByUsername(signupRequest.getUsername()) != null)
+                throw new RuntimeException("This username is already exsit");
+            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+            User user = modelMapper.map(signupRequest, User.class);
+            user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
+            if (signupRequest.getBirthDate() != null)
+                user.setBirthDate(format.parse(signupRequest.getBirthDate()));
+            if (signupRequest.getRole().equals("ROLE_DOCTOR"))
+                user.setRoles(Arrays.asList(roleRepository.findByCode("ROLE_USER"),roleRepository.findByCode("ROLE_DOCTOR")));
+            else
+                user.setRoles(Collections.singletonList(roleRepository.findByCode("ROLE_USER")));
+            userRepository.save(user);
+            StringResponse response = new StringResponse();
+            response.setResponseCode(ResponseCode.SUCCESS.getCode());
+            response.setResponseStatus(ResponseCode.SUCCESS.name());
+            response.setMessage("Create User Successfully");
+            return ResponseEntity.ok(response);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
     }
 
 //    http://localhost:8083/api/auth/loginGoogle?code=4%2F0AfJohXlX7nKM0fVrrv3264Oh-UOFU8pkAGETYTfkYdha9uuUp4EuOmxu5ygjuhroJKHB6w&scope=profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile

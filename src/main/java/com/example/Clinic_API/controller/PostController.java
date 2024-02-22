@@ -18,18 +18,23 @@ public class PostController {
     PostService postService;
 
     @GetMapping("/getPosts")
-    public ResponseEntity<?> getPosts(@RequestParam Long userId, @RequestParam(required = false) Integer limit){
-        return ResponseEntity.ok(postService.getPosts(userId,limit));
+    public ResponseEntity<?> getPosts(@RequestParam(required = false) Long userId,
+                                      @RequestParam(required = false) Long clinicId,
+                                      @RequestParam(required = false, defaultValue = "10") Integer limit,
+                                      @RequestParam(required = false, defaultValue = "1") Integer page,
+                                      @RequestParam(required = false) String type){
+        return ResponseEntity.ok(postService.getPosts(userId,clinicId,limit, page));
+    }
+
+    @PostMapping(value = "/create", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<?> createPost(@ModelAttribute PostRequest postRequest, @RequestParam String type){
+        postService.createPost(postRequest, type);
+        StringResponse response=new StringResponse(ResponseCode.SUCCESS.getCode(),ResponseCode.SUCCESS.name(), "Create blog Sucess");
+        return ResponseEntity.ok(response);
     }
 
 
-//    @PostMapping(value = "/create", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-//    public ResponseEntity<?> createPost(@ModelAttribute PostRequest postRequest){
-//        postService.createPost(postRequest.getTitle(),postRequest.getContent(),postRequest.getPostTypeId(),postRequest.getFiles());
-//        StringResponse response=new StringResponse(ResponseCode.SUCCESS.getCode(),ResponseCode.SUCCESS.name(), "Create blog Sucess");
-//        return ResponseEntity.ok(response);
-//    }
-//    //
+
 //    @PutMapping("update/{postId}")
 //    public ResponseEntity<?> updatePost(@PathVariable Long postId,@ModelAttribute PostRequest postRequest){
 //        postService.updatePost(postId,postRequest.getTitle(),postRequest.getContent(), postRequest.getPostTypeId(),postRequest.getFiles());

@@ -36,4 +36,12 @@ public class Attachment extends BaseEntity{
     @JoinColumn(name = "attachmentType_id")
     @JsonIgnore
     private AttachmentType attachmentType;
+
+    public Attachment(String url, Post post, User user, Clinic clinic, AttachmentType attachmentType) {
+        this.url = url;
+        this.post = post;
+        this.user = user;
+        this.clinic = clinic;
+        this.attachmentType = attachmentType;
+    }
 }

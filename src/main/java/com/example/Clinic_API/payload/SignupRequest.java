@@ -26,5 +26,8 @@ public class SignupRequest {
     private String phone;
 
     @Email(message = "Email Format is incorrect")
+    @NotNull
     private String email;
+
+    private String role;
 }

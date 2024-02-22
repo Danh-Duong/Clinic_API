@@ -227,14 +227,15 @@ public class ClinicService {
         Clinic clinic=clinicRepository.findById(clinicId).orElseThrow(() -> new RuntimeException("This clinic doesn't exsit"));
         User doctor=userRepository.findByUsername(email);
         if (doctor==null)
-            throw new RuntimeException("This doctor doesn't exsit");
+            throw new RuntimeException("This added doctor doesn't exsit");
         if (!doctor.getRoles().contains(roleRepository.findByCode("ROLE_DOCTOR")))
             throw new RuntimeException("This user isn't doctor");
         if (clinic.getUsers().contains(doctor))
             throw new RuntimeException("This doctor is already in this clinic");
         // kiểm tra xem user có tồn tại ở clinic khác không
-        if (doctor.getClinics().size()>0)
-            throw new RuntimeException("This doctor belongs to another clinic");
+        // trường hợp bác sĩ đi khám bệnh
+//        if (doctor.getClinics().size()>0)
+//            throw new RuntimeException("This doctor belongs to another clinic");
         currentUser.getInfoUser();
         if (currentUser.getUser()!=clinic.getUserCreate())
             throw new RuntimeException("This action is banned. You must a doctor create clinic");

@@ -90,7 +90,7 @@ public class ClinicController {
     public ResponseEntity<?> addDoctorIntoClinic(@RequestParam Long clinicId,
                                                  @RequestParam String email){
         clinicService.addDoctorIntoClinic(clinicId, email);
-        StringResponse response=new StringResponse(ResponseCode.SUCCESS.getCode(),ResponseCode.SUCCESS.name(), "Add doctor into clinic success");
+        StringResponse response=new StringResponse(ResponseCode.SUCCESS.getCode(),ResponseCode.SUCCESS.name(), "Add doctor into clinic successfully");
         return ResponseEntity.ok(response);
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class PostRequest {
     private String title;
     private String content;
-    private Long postTypeId;
+//    private Long postTypeId;
+    private Long clinicId;
     private MultipartFile[] files;
 }

@@ -2,17 +2,14 @@ package com.example.Clinic_API.service;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.example.Clinic_API.entities.Attachment;
-import com.example.Clinic_API.entities.Post;
-import com.example.Clinic_API.entities.StatusPost;
-import com.example.Clinic_API.entities.User;
+import com.example.Clinic_API.entities.*;
+import com.example.Clinic_API.payload.PostRequest;
 import com.example.Clinic_API.payload.StatusEnum;
-import com.example.Clinic_API.repository.PostRepository;
-import com.example.Clinic_API.repository.PostTypeRepository;
-import com.example.Clinic_API.repository.StatusRepository;
-import com.example.Clinic_API.repository.UserRepository;
+import com.example.Clinic_API.repository.*;
 import com.example.Clinic_API.security.CurrentUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,6 +21,9 @@ public class PostService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    AttachmentTypeRepository attachmentTypeRepository;
 
     @Autowired
     final CurrentUser currentUser=new CurrentUser();
@@ -39,37 +39,56 @@ public class PostService {
 
     @Autowired
     StatusRepository statusRepository;
+    @Autowired
+    private ClinicRepository clinicRepository;
 
-    public List<Post> getPosts(Long userId, Integer limit){
-        User user=userRepository.findById(userId).orElseThrow(()-> new RuntimeException("This user is none-exsit"));
-        return user.getPosts();
+    public List<Post> getPosts(Long userId, Long clinicId, Integer limit, Integer page){
+        Pageable pg=PageRequest.of(page-1, limit);
+        // lấy bài post theo user;
+        if (userId!=null){
+            User user=userRepository.findById(userId).orElseThrow(()-> new RuntimeException("This user is none-exsit"));
+//            return user.getPosts();
+            return postRepository.findByUserPost(user.getId(),pg);
+        }
+        // lấy bài post theo clinic
+        return postRepository.findByClinicId(clinicId,pg);
     }
 
-//    public void createPost(String title,String content, Long postTypeId, MultipartFile[] files){
-//        // lấy thông tin tất cả hiện tại của user
-//        try{
-//            currentUser.getInfoUser();
-//            Post post=new Post();
-//            post.setTitle(title);
-//            post.setContent(content);
-//            post.setPostType(postTypeRepository.findById(postTypeId).get());
-//            post.setUser(currentUser.getUser());
-//            List<Attachment> attachments=new ArrayList<>();
-//            if (files!=null && files.length>0){
-//                System.out.println("oke");
-//                for (MultipartFile file: files){
-//                    String urlImage=cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap()).get("secure_url").toString();
-//                    attachments.add(new Attachment("",urlImage,post));
-//                }
-//                post.setAttachments(attachments);
-//            }
-//            postRepository.save(post);
-//        }
-//        catch (Exception e){
+    public void createPost(PostRequest postRequest,String type){
+        // lấy thông tin tất cả hiện tại của user
+        try{
+            currentUser.getInfoUser();
+            Post post=new Post();
+            post.setTitle(postRequest.getTitle());
+            post.setContent(postRequest.getContent());
+//            post.setPostType(postTypeRepository.findById(postRequest.getPostTypeId()).get());
+            post.setUser(currentUser.getUser());
+            // Khi tạo blog cho clinic
+            Clinic clinic=null;
+            if (type.equals("clinic"))
+            {
+                clinic=clinicRepository.findById(postRequest.getClinicId()).orElseThrow(() -> new RuntimeException("This clinic doesn't exsit"));
+                if (clinic.getUserCreate()==currentUser.getUser())
+                    post.setClinic(clinic);
+            }
+
+            List<Attachment> attachments=new ArrayList<>();
+            if (postRequest.getFiles()!=null && postRequest.getFiles().length>0){
+                AttachmentType attachmentType=attachmentTypeRepository.findByCode("POST");
+                for (MultipartFile file: postRequest.getFiles()){
+                    String urlImage=cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap()).get("secure_url").toString();
+                    attachments.add(new Attachment(urlImage,post,currentUser.getUser(),clinic,attachmentType));
+                }
+                post.setAttachments(attachments);
+            }
+            postRepository.save(post);
+        }
+        catch (Exception e){
 //            throw new RuntimeException(e.getMessage());
-//        }
-//
-//    }
+            e.printStackTrace();
+        }
+
+    }
 
 //    public void updatePost(Long postId,String title,String content, Long postTypeId, MultipartFile[] files){
 //        try{

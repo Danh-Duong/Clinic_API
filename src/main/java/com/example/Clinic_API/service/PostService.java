@@ -7,6 +7,8 @@ import com.example.Clinic_API.payload.PostRequest;
 import com.example.Clinic_API.payload.StatusEnum;
 import com.example.Clinic_API.repository.*;
 import com.example.Clinic_API.security.CurrentUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,9 +40,14 @@ public class PostService {
     Cloudinary cloudinary;
 
     @Autowired
+    AttachmentRepository attachmentRepository;
+
+    @Autowired
     StatusRepository statusRepository;
     @Autowired
     private ClinicRepository clinicRepository;
+
+    private static Logger logger=LoggerFactory.getLogger(PostService.class);
 
     public List<Post> getPosts(Long userId, Long clinicId, Integer limit, Integer page){
         Pageable pg=PageRequest.of(page-1, limit);
@@ -90,35 +97,42 @@ public class PostService {
 
     }
 
-//    public void updatePost(Long postId,String title,String content, Long postTypeId, MultipartFile[] files){
-//        try{
-//            Post post=postRepository.findById(postId).orElseThrow(() -> new RuntimeException("This post is none-exit"));
-//            // lấy thông tin user hiện tại
-//            currentUser.getInfoUser();
-//            if (post.getUser()==currentUser.getUser()){
-//                if (title!=null)
-//                    post.setTitle(title);
-//                if (content!=null)
-//                    post.setContent(content);
+    public void updatePost(Long postId, PostRequest postRequest){
+        try{
+            Post post=postRepository.findById(postId).orElseThrow(() -> new RuntimeException("This post doesn't exsit"));
+            // lấy thông tin user hiện tại
+            Clinic clinic=post.getClinic();
+            currentUser.getInfoUser();
+            if (post.getUser()==currentUser.getUser()){
+                if (postRequest.getTitle()!=null)
+                    post.setTitle(postRequest.getTitle());
+                if (postRequest.getContent()!=null)
+                    post.setContent(postRequest.getContent());
 //                if (postTypeId!=null)
 //                    post.setPostType(postTypeRepository.findById(postTypeId).get());
-//                if (files!=null && files.length>0){
-//                    post.getAttachments().clear();
-//                    postRepository.save(post);
-//                    for (MultipartFile file: files){
-//                        String urlImage=cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap()).get("secure_url").toString();
-//                        post.getAttachments().add(new Attachment("",urlImage,post));
-//                    }
-//                }
-//                postRepository.save(post);
-//            }
-//            else
-//                throw new RuntimeException("This action is banned");
-//        }
-//        catch (Exception e){
+
+                if (postRequest.getFiles()!=null && postRequest.getFiles().length>0){
+                    // xóa sạch file cũ
+                    // chú ý xóa dữ liệu trên cloudinary
+                    attachmentRepository.deleteAttachmentByPost(post);
+                    postRepository.save(post);
+                    AttachmentType attachmentType= attachmentTypeRepository.findByCode("POST");
+                    for (MultipartFile file: postRequest.getFiles()){
+                        String urlImage=cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap()).get("secure_url").toString();
+                        post.getAttachments().add(new Attachment(urlImage,post,currentUser.getUser(),clinic, attachmentType));
+                    }
+                }
+                postRepository.save(post);
+            }
+            else
+                throw new RuntimeException("This action is banned");
+        }
+        catch (Exception e){
 //            throw new RuntimeException(e.getMessage());
-//        }
-//    }
+            e.printStackTrace();
+        }
+
+    }
 //
 //    public void deletePost(Long postId){
 //        Post post=postRepository.findById(postId).orElseThrow(() -> new RuntimeException("This post is none-exsit"));

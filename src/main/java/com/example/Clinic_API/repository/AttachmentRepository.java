@@ -1,17 +1,14 @@
 package com.example.Clinic_API.repository;
 
-import com.example.Clinic_API.entities.Attachment;
-import com.example.Clinic_API.entities.AttachmentType;
-import com.example.Clinic_API.entities.Clinic;
-import com.example.Clinic_API.entities.User;
+import com.example.Clinic_API.entities.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
-//    Attachment findByUserAndAttachmentType(User user, AttachmentType attachmentType);
-//    Attachment findByUserIdAndAttachmentTypeId(Long userId, Long attachmentType);
-//
-//    Attachment findByClinicIdAndAttachmentTypeCode(Long clinicId, String code);
+
+    @Transactional
+    public void deleteAttachmentByPost(Post post);
 
 }

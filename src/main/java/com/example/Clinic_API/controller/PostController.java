@@ -33,14 +33,12 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
-
-
-//    @PutMapping("update/{postId}")
-//    public ResponseEntity<?> updatePost(@PathVariable Long postId,@ModelAttribute PostRequest postRequest){
-//        postService.updatePost(postId,postRequest.getTitle(),postRequest.getContent(), postRequest.getPostTypeId(),postRequest.getFiles());
-//        StringResponse response=new StringResponse(ResponseCode.SUCCESS.getCode(),ResponseCode.SUCCESS.name(), "Update post success");
-//        return ResponseEntity.ok(response);
-//    }
+    @PutMapping("update/{postId}")
+    public ResponseEntity<?> updatePost(@PathVariable Long postId,@ModelAttribute PostRequest postRequest){
+        postService.updatePost(postId,postRequest);
+        StringResponse response=new StringResponse(ResponseCode.SUCCESS.getCode(),ResponseCode.SUCCESS.name(), "Update Post Successfully!");
+        return ResponseEntity.ok(response);
+    }
 //
 //    @DeleteMapping("/delete/{postId}")
 //    public ResponseEntity<?> deletePost(@PathVariable Long postId){

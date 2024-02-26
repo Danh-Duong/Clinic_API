@@ -3,8 +3,10 @@ package com.example.Clinic_API.service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.example.Clinic_API.entities.*;
+import com.example.Clinic_API.enums.ResponseCode;
 import com.example.Clinic_API.payload.PostRequest;
 import com.example.Clinic_API.payload.StatusEnum;
+import com.example.Clinic_API.payload.StatusNumResponse;
 import com.example.Clinic_API.repository.*;
 import com.example.Clinic_API.security.CurrentUser;
 import org.slf4j.Logger;
@@ -134,34 +136,37 @@ public class PostService {
 
     }
 //
-//    public void deletePost(Long postId){
-//        Post post=postRepository.findById(postId).orElseThrow(() -> new RuntimeException("This post is none-exsit"));
-//        currentUser.getInfoUser();
-//        if (!(currentUser.getIsAdmin() || currentUser.getUser()==post.getUser()))
-//            throw new RuntimeException("This action is banned");
-//        postRepository.delete(post);
-//    }
+    public void deletePost(Long postId){
+        Post post=postRepository.findById(postId).orElseThrow(() -> new RuntimeException("This post is none-exsit"));
+        currentUser.getInfoUser();
+        if (!(currentUser.getIsAdmin() || currentUser.getUser()==post.getUser()))
+            throw new RuntimeException("This action is banned");
+        postRepository.delete(post);
+    }
 //
-//    public void updateStatus(Long postId, String statusName){
-//        try {
-//            Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("This post is none-exsit"));
-//            currentUser.getInfoUser();
-//            StatusPost statusPost = statusRepository.findByUserAndPost(currentUser.getUser(), post);
-//            // này là tạo mới
-//            if (statusPost == null) {
-//                StatusPost newStatusPost = new StatusPost();
-//                newStatusPost.setUser(currentUser.getUser());
-//                newStatusPost.setPost(post);
-//                newStatusPost.setStatus(statusName);
+    public void updateStatus(Long postId, String statusName){
+        try {
+            Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("This post doesn't exsit"));
+            currentUser.getInfoUser();
+            StatusPost statusPost = statusRepository.findByUserAndPost(currentUser.getUser(), post);
+            // tạo mới cảm xúc cho bài post
+            if (statusPost == null) {
+                if (!statusName.equals("NONE")) {
+                    StatusPost newStatusPost = new StatusPost();
+                    newStatusPost.setUser(currentUser.getUser());
+                    newStatusPost.setPost(post);
+                    newStatusPost.setStatus(statusName);
+
 //                if (statusName.equals(StatusEnum.LIKE.name()))
 //                    post.setLikeStatus(post.getLikeStatus() + 1);
 //                else if (statusName.equals(StatusEnum.DISLIKE.name()))
 //                    post.setDislikeStatus(post.getDislikeStatus() + 1);
-//                statusRepository.save(newStatusPost);
-//            }
-//            // cập nhập status của bài post
-//            else {
-//                // gán giá trị trung gian
+                    statusRepository.save(newStatusPost);
+                }
+            }
+            // cập nhập status của bài post
+            else {
+                // gán giá trị trung gian
 //                String s = statusPost.getStatus();
 //                // set giá trị thực
 //                statusPost.setStatus(statusName);
@@ -177,13 +182,28 @@ public class PostService {
 //                    if (statusName.equals(StatusEnum.LIKE.name()))
 //                        post.setLikeStatus(post.getLikeStatus() + 1);
 //                }
-//
-//            }
-//            postRepository.save(post);
-//        }
-//        catch (Exception e){
-//            e.printStackTrace();
-//        }
-//
-//    }
+                if (statusName.equals("NONE"))
+                    statusRepository.delete(statusPost);
+                else {
+                    statusPost.setStatus(statusName);
+                    statusRepository.save(statusPost);
+                }
+            }
+            postRepository.save(post);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public StatusNumResponse getNumOfStatus(Long postId, String status){
+        Post post= postRepository.findById(postId).orElseThrow(() -> new RuntimeException("This post doesn't exsit"));
+        long numb=0;
+        // lấy tất cả
+        if (status==null || status.equals(""))
+            numb= statusRepository.countByPost(post);
+        else
+            numb=statusRepository.countByPostAndStatus(post, status);;
+        return new StatusNumResponse(ResponseCode.SUCCESS.name(),ResponseCode.SUCCESS.getCode(),numb);
+    }
 }

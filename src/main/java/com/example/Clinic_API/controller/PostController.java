@@ -40,19 +40,25 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 //
-//    @DeleteMapping("/delete/{postId}")
-//    public ResponseEntity<?> deletePost(@PathVariable Long postId){
-//        postService.deletePost(postId);
-//        StringResponse response=new StringResponse(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.name(), "Delete post success");
-//        return ResponseEntity.ok(response);
-//    }
+    @DeleteMapping("/delete/{postId}")
+    public ResponseEntity<?> deletePost(@PathVariable Long postId){
+        postService.deletePost(postId);
+        StringResponse response=new StringResponse(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.name(), "Delete post success");
+        return ResponseEntity.ok(response);
+    }
 //
 //    // bày tỏ cảm xúc về bài viết
 //    // bao gồm cả thêm và cập nhập cảm xúc
-//    @PostMapping("/status/{postId}")
-//    public ResponseEntity<?> updateStatus(@PathVariable Long postId,@RequestParam String status){
-//        postService.updateStatus(postId,status);
-//        StringResponse response=new StringResponse(ResponseCode.SUCCESS.getCode(),ResponseCode.SUCCESS.name(), "Update status success");
-//        return ResponseEntity.ok(response);
-//    }
+    @PutMapping("/status/{postId}")
+    public ResponseEntity<?> updateStatus(@PathVariable Long postId,@RequestParam String status){
+        postService.updateStatus(postId,status);
+        StringResponse response=new StringResponse(ResponseCode.SUCCESS.getCode(),ResponseCode.SUCCESS.name(), "Update status success");
+        return ResponseEntity.ok(response);
+    }
+
+    // lấy ra số lượng cảm xúc phân loại
+    @GetMapping("/status")
+    public ResponseEntity<?> getNumOfStatus(@RequestParam Long postId, @RequestParam String status){
+        return ResponseEntity.ok(postService.getNumOfStatus(postId, status));
+    }
 }

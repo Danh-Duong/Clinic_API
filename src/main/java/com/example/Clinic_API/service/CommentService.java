@@ -4,13 +4,12 @@ package com.example.Clinic_API.service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.example.Clinic_API.config.CloudinaryConfig;
-import com.example.Clinic_API.entities.Comment;
-import com.example.Clinic_API.entities.Post;
-import com.example.Clinic_API.entities.User;
+import com.example.Clinic_API.entities.*;
 import com.example.Clinic_API.payload.CommentRequest;
 import com.example.Clinic_API.payload.CommentResponse;
 import com.example.Clinic_API.repository.*;
 import com.example.Clinic_API.security.CurrentUser;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,55 +44,96 @@ public class CommentService {
     @Autowired
     Cloudinary cloudinary;
 
+    @Autowired
+    ModelMapper modelMapper;
+    @Autowired
+    private AttachmentRepository attachmentRepository;
 
-//    public List<CommentResponse> getCommentDoctor(Integer limit,Long doctorId){
-//        User doctor=userRepository.findById(doctorId).orElseThrow(() -> new RuntimeException("This doctor is non-exit"));
-//        if (!doctor.getRoles().contains(roleRepository.findByCode("ROLE_DOCTOR")))
-//            throw new RuntimeException("This user is not a doctor");
-//        List<CommentResponse> comments=new ArrayList<>();
-//        Pageable pageable= PageRequest.of(0,limit, Sort.by("createAt").descending());
-//        for (Comment c: commentRepository.findByDoctorId(doctorId,pageable)){
-//            String avatar=c.getUser().getAvatarUrl();
-////            for (Attachment attachment: c.getUser().getAttachments())
-////                if (attachment.getAttachmentType()==attachmentTypeRepository.findByCode("AVATAR"))
-////                    avatar=attachment.getFileUrl();
-//            if (avatar=="")
-//                avatar="https://facebookninja.vn/wp-content/uploads/2023/06/anh-dai-dien-mac-dinh-zalo.jpg";
-//            comments.add(new CommentResponse(avatar, c.getUser().getUsername(),c.getContent(),c.getCreateAt()));
-//        }
-//        return comments;
-//    }
+
+    // sắp xếp theo thời gian
+    public List<CommentResponse> getComment(Integer limit,Long doctorId, Long postId){
+        User doctor=userRepository.findById(doctorId).orElseThrow(() -> new RuntimeException("This doctor doesn't exsit"));
+        if (!doctor.getRoles().contains(roleRepository.findByCode("ROLE_DOCTOR")))
+            throw new RuntimeException("This user is not a doctor");
+        Post post=postRepository.findById(postId).orElseThrow(() -> new RuntimeException("This post doesn't exsit"));
+        List<CommentResponse> responses=new ArrayList<>();
+        Pageable pageable= PageRequest.of(0,limit, Sort.by("createAt").descending());
+        List<Comment> comments = null;
+        // lấy danh sách các bình luận theo bài post
+        if (postId!=null) {
+            comments = commentRepository.findByPostId(postId, pageable);
+        }
+        else if (doctorId!=null)
+            comments=commentRepository.findByDoctorId(doctorId,pageable);
+        for (Comment c: comments){
+            String avatar=c.getUser().getAvatarUrl();
+            responses.add(new CommentResponse(avatar, c.getUser().getUsername(),c.getContent(),c.getUpdateAt(),c.getAttachment().getUrl()));
+        }
+        return responses;
+    }
 //
-//    public void createDoctorComment(Long doctorId, CommentRequest commentRequest){
-//        // kiểm tra bác sĩ
-//        User doctor=userRepository.findById(doctorId).orElseThrow(() -> new RuntimeException("This doctor is non-exit"));
-//        if (!doctor.getRoles().contains(roleRepository.findByCode("ROLE_DOCTOR")))
-//            throw new RuntimeException("This user is not a doctor");
-//        currentUser.getInfoUser();
-//        Comment comment=new Comment();
-//        comment.setDoctor(doctor);
-//        comment.setContent(commentRequest.getContent());
-//        comment.setUser(currentUser.getUser());
-//        commentRepository.save(comment);
-//    }
+    public void createDoctorComment(Long doctorId, Long postId, CommentRequest commentRequest){
+        // kiểm tra bác sĩ
+        try {
+            User doctor = userRepository.findById(doctorId).orElseThrow(() -> new RuntimeException("This doctor doesn't exsit"));
+            if (!doctor.getRoles().contains(roleRepository.findByCode("ROLE_DOCTOR")))
+                throw new RuntimeException("This user is not a doctor");
+            Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("This post doesn't exsit"));
+            currentUser.getInfoUser();
+            Comment comment = new Comment();
+            // tạo bình luận cho bác sĩ
+            if (doctorId != null)
+                comment.setDoctor(doctor);
+            if (postId != null) {
+                comment.setPost(post);
+                if (commentRequest.getImage() != null) {
+                    String url = cloudinary.uploader().upload(commentRequest.getImage().getBytes(), ObjectUtils.emptyMap()).get("secure_url").toString();
+                    Attachment attachment= new Attachment();
+                    attachment.setPost(post);
+                    attachment.setUrl(url);
+                    comment.setAttachment(attachment);
+                }
+            }
+
+            comment.setContent(commentRequest.getContent());
+            comment.setUser(currentUser.getUser());
+            commentRepository.save(comment);
+        }
+        catch (Exception e){
+            throw new RuntimeException(e.getMessage());
+        }
+    }
 //
 //
-//    public void updateDoctorComment(Long commentId, CommentRequest commentRequest){
-//        Comment comment=commentRepository.findById(commentId).orElseThrow(() -> new RuntimeException("This comment is non-exsit"));
-//        currentUser.getInfoUser();
-//        if (!(comment.getUser()==currentUser.getUser() || currentUser.getIsAdmin()))
-//            throw new RuntimeException("This action is banner");
-//        comment.setContent(commentRequest.getContent());
-//        commentRepository.save(comment);
-//    }
+    public void updateComment(Long commentId, CommentRequest commentRequest){
+        try{
+        Comment comment=commentRepository.findById(commentId).orElseThrow(() -> new RuntimeException("This comment is doesn't exsit"));
+        currentUser.getInfoUser();
+        if (!(comment.getUser()==currentUser.getUser() || currentUser.getIsAdmin()))
+            throw new RuntimeException("This action is banner");
+        comment.setContent(commentRequest.getContent());
+        if (commentRequest.getImage()!=null)
+        {
+            attachmentRepository.deleteAttachmentByComment(comment);
+            String url= cloudinary.uploader().upload(commentRequest.getImage().getBytes(), ObjectUtils.emptyMap()).get("secure_").toString();
+            Attachment attachment= new Attachment();
+            attachment.setPost(comment.getPost());
+            attachment.setUrl(url);
+            comment.setAttachment(attachment);
+        }
+        commentRepository.save(comment);}
+        catch (Exception e){
+            throw new RuntimeException(e.getMessage());
+        }
+    }
 //
-//    public void deleteDoctorComment(Long commentId){
-//        Comment comment=commentRepository.findById(commentId).orElseThrow(() -> new RuntimeException("This comment doctor is non-exsit"));
-//        currentUser.getInfoUser();
-//        if (!(comment.getUser()==currentUser.getUser() || currentUser.getIsAdmin()))
-//            throw new RuntimeException("This action is banner");
-//        commentRepository.delete(comment);
-//    }
+    public void deleteComment(Long commentId){
+        Comment comment=commentRepository.findById(commentId).orElseThrow(() -> new RuntimeException("This comment is doesn't exsit"));
+        currentUser.getInfoUser();
+        if (!(comment.getUser()==currentUser.getUser() || currentUser.getIsAdmin()))
+            throw new RuntimeException("This action is banner");
+        commentRepository.delete(comment);
+    }
 
     // comment của bài blog
 //    public List<CommentResponse> getCommentPost(Long postId, Integer limit){

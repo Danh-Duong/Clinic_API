@@ -67,9 +67,9 @@ public class User extends BaseEntity{
     @OneToMany(mappedBy = "user")
     private List<Comment> commentUsers;
 
-    // người comment
-    @OneToMany(mappedBy = "doctor")
-    private List<Comment> commentDoctors;
+    // bác sĩ được comment
+//    @OneToMany(mappedBy = "doctor")
+//    private List<Comment> commentDoctors;
 
     // 1 bác sĩ có thể tạo nhiều lịch khám
     @OneToMany(mappedBy = "doctor")
@@ -80,8 +80,8 @@ public class User extends BaseEntity{
     private List<Booking> bookingUsers;
 
     // 1 bác sĩ có nhiều lịch đặt
-    @OneToMany(mappedBy = "doctor")
-    private List<Booking> bookingDoctors;
+//    @OneToMany(mappedBy = "doctor")
+//    private List<Booking> bookingDoctors;
 
     @OneToOne(mappedBy = "user")
     private EmailToken emailToken;

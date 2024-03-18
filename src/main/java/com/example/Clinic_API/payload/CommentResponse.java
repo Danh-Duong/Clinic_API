@@ -16,7 +16,7 @@ public class CommentResponse {
     private String content;
     private Date commentAt;
 
-    private String attachment;
+    private String attachmentUrl;
 
     public CommentResponse(String avatar, String username, String content, Date commentAt) {
         this.avatar = avatar;

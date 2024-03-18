@@ -21,5 +21,5 @@ public class Degree extends BaseEntity{
     private Boolean isActive;
 
     @ManyToMany(mappedBy = "degrees")
-    private List<User> doctor;
+    private List<User> doctors;
 }

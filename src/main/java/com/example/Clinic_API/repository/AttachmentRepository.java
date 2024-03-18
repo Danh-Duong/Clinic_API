@@ -11,4 +11,6 @@ public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
     @Transactional
     public void deleteAttachmentByPost(Post post);
 
+    public void deleteAttachmentByComment(Comment comment);
+
 }

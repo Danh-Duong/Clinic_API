@@ -37,6 +37,10 @@ public class Attachment extends BaseEntity{
     @JsonIgnore
     private AttachmentType attachmentType;
 
+    @OneToOne
+    @JsonIgnore
+    private Comment comment;
+
     public Attachment(String url, Post post, User user, Clinic clinic, AttachmentType attachmentType) {
         this.url = url;
         this.post = post;

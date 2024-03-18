@@ -24,7 +24,6 @@
 			<version>3.1.4</version>
 		</dependency>
 
-
 		<!--		kết nối database mysql-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

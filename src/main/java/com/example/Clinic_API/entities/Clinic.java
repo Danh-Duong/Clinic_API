@@ -25,11 +25,11 @@ public class Clinic extends BaseEntity{
     // ở đây có thể là link facebook, hay link gg
     private String urlInfo;
 
-//    @ManyToOne
-//    @JoinColumn(name = "district_id")
-//    @JsonIgnore
-//    private District district;
-    private Long districtId;
+    @ManyToOne
+    @JoinColumn(name = "district_id")
+    @JsonIgnore
+    private District district;
+//    private Long districtId;
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "clinic_faculty", joinColumns = @JoinColumn(name = "clinic_id"),

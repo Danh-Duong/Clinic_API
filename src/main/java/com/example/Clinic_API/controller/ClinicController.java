@@ -33,6 +33,12 @@ public class ClinicController {
         return ResponseEntity.ok(clinicService.getAllClinics(limit,page,provinceId, districtId, facultyId,name));
     }
 
+
+    @GetMapping("/bestClinic")
+    public ResponseEntity<?> getBestClinic(){
+        return ResponseEntity.ok(clinicService.getBestClinic());
+    }
+
     // lấy thông tin chi tiết của clinic
     @GetMapping("/{clinicId}")
     public ResponseEntity<?> getClinic(@PathVariable Long clinicId){

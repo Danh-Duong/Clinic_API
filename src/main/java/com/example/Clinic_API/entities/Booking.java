@@ -41,8 +41,6 @@ public class Booking extends BaseEntity{
     public User doctor;
 
     // thời gian khám bệnh
-    @OneToOne
-    @JoinColumn(name = "appointment_id")
-    @JsonIgnore
+    @OneToOne(mappedBy = "booking")
     private Appointment appointment;
 }

@@ -16,22 +16,18 @@ import java.util.Date;
 public class Appointment extends BaseEntity{
 
     // thời gian lịch khám
-    private Date fromDate;
-    private Date toDate;
-    //còn trống chỗ hay không
-    private Boolean isVacant=true;
+    private Date fromTime;
+    private Date toTime;
+    // trạng thái: trống, hết, bận
+    private String status;
 
-    // thông tin bác sĩ
-    // từ thông tin của bác sĩ có thể lấy được thông tin clinic
-    // vì 1 bác sĩ chỉ thuộc về 1 clinic
-    // nhưng có thể có nhiều faculty
-    // tại 1 phòng khám có thể khám nhiều lĩnh vực
-    // lịch này là đăng ký cho tất cả các lĩnh vực (khoa)
     @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonIgnore
     private User doctor;
 
-    @OneToOne(mappedBy = "appointment")
+    @OneToOne
+    @JoinColumn(name = "booking_id")
+    @JsonIgnore
     private Booking booking;
 }

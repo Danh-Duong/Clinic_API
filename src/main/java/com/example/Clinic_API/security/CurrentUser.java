@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 public class CurrentUser {
 
     @Autowired
-    UserRepository userReposiitory;
+    UserRepository userRepository;
 
     private User user;
     private Boolean isAdmin;
@@ -31,7 +31,7 @@ public class CurrentUser {
     public CurrentUser getInfoUser(){
         Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
         String username=authentication.getName();
-        User currentUser= userReposiitory.findByUsername(username);
+        User currentUser= userRepository.findByUsername(username);
         // bắt buộc phải setUser nha
         setUser(currentUser);
         String roles = "";

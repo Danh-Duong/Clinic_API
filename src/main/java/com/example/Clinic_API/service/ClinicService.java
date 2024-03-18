@@ -89,6 +89,12 @@ public class ClinicService {
         return null;
     }
 
+    // lấy danh sách bệnh viện có tổng lịch đặt cao nhất
+    public List<Clinic> getBestClinic(){
+        // lấy tổng các lịch đặt của các bác sĩ trong bệnh viện đó.
+        List<User> doctors =  userRepository
+    }
+
     // trả về thông tin chi tiết của bệnh viện
     public ClinicDetailResponse getClinicById(Long clinicId){
         Clinic clinic=clinicRepository.findById(clinicId).orElseThrow(() -> new RuntimeException("This clinic does not exist"));

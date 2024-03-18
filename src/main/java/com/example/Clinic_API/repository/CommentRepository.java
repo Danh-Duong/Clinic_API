@@ -9,12 +9,11 @@ import java.util.List;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
-    // chú ý: có thể sử dụng fielkd của @Column
-//    List<Comment> findByDoctorId(Long doctorId, Pageable pageable);
-//
-//    List<Comment> findByPostId(Long postId, Pageable pageable);
-//
-//    Comment findByPostIdAndUserId(Long postId, Long userId);
+    // chú ý: có thể sử dụng field của @Column
+    List<Comment> findByDoctorId(Long doctorId, Pageable pageable);
+
+    List<Comment> findByPostId(Long postId, Pageable pageable);
+
 
 
 }

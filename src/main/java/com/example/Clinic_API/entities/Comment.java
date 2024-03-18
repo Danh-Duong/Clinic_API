@@ -38,4 +38,8 @@ public class Comment extends BaseEntity{
     @JoinColumn(name = "clinic_id")
     @JsonIgnore
     private Clinic clinic;
+
+    // chứa hình ảnh
+    @OneToOne(mappedBy = "comment")
+    private Attachment attachment;
 }
